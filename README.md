@@ -322,23 +322,10 @@ Open your browser at `http://localhost:5173`.
 - [x] AI ATS Resume Analyzer with ML scoring pipeline
 - [x] Job role suggestions via TF-IDF cosine similarity
 - [x] Site assistant chatbot
-- [ ] AI Cover Letter Generator
-- [ ] Job Description Keyword Gap Analysis
-- [ ] Resume version history and diff comparison
-
----
 
 ## License
 
 Distributed under the MIT License. See [LICENSE](LICENSE) for details.
-
----
-
-## Author
-
-**Krutarth Talaviya**
-- GitHub: [@Krutarth-Talaviya-0712](https://github.com/Krutarth-Talaviya-0712)
-- Email: [krutarthtalaviya11@gmail.com](mailto:krutarthtalaviya11@gmail.com)
 
 ---
 
