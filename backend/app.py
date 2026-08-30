@@ -49,12 +49,19 @@ def create_app():
     jwt.init_app(app)
     bcrypt.init_app(app)
 
+    # File upload size limit (5 MB)
+    app.config["MAX_CONTENT_LENGTH"] = 5 * 1024 * 1024
+
     # Register blueprints
     from auth.auth_routes import auth_bp
     from create_resume.resume_routes import resume_bp
+    from analyze.analyze_routes import analyze_bp
+    from chatbot.chatbot_routes import chatbot_bp
 
     app.register_blueprint(auth_bp, url_prefix="/api/auth")
     app.register_blueprint(resume_bp, url_prefix="/api/resume")
+    app.register_blueprint(analyze_bp, url_prefix="/api/analyze")
+    app.register_blueprint(chatbot_bp, url_prefix="/api/chatbot")
 
     # API health check endpoint
     @app.route("/", methods=["GET"])
@@ -62,7 +69,13 @@ def create_app():
         return jsonify({
             "status": "success",
             "message": "ResumeCraft API is running successfully",
-            "version": "1.0.0"
+            "version": "2.0.0",
+            "endpoints": {
+                "auth": "/api/auth",
+                "resume": "/api/resume",
+                "analyze": "/api/analyze",
+                "chatbot": "/api/chatbot",
+            },
         })
 
     return app
@@ -74,6 +87,12 @@ if __name__ == "__main__":
     with app.app_context():
         from models import User, Resume, Analysis  # noqa: F401
         db.create_all()
+        # Warm up spaCy model on startup to avoid cold-start delay on first request
+        try:
+            from analyze.nlp_pipeline import _load_model
+            _load_model()
+        except Exception:
+            pass
         print("Database tables initialized successfully.")
 
     port = int(os.getenv("PORT", 5000))

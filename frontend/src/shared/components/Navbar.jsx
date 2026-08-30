@@ -1,12 +1,15 @@
 import { useState, useRef, useEffect } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 
 const Navbar = () => {
   const { user, logout, isAuthenticated } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const dropdownRef = useRef(null);
+
+  const isActive = (path) => location.pathname === path;
 
   // Close dropdown on outside click
   useEffect(() => {
@@ -52,24 +55,37 @@ const Navbar = () => {
           <div className="flex items-center space-x-2">
             <Link
               to="/builder"
-              className="text-gray-700 hover:text-blue-600 hover:bg-blue-50 px-3 py-2 rounded-lg text-sm font-medium transition-all"
+              className={`px-3 py-2 rounded-lg text-sm font-medium transition-all ${
+                isActive('/builder')
+                  ? 'bg-blue-50 text-blue-600 font-semibold'
+                  : 'text-gray-700 hover:text-blue-600 hover:bg-blue-50'
+              }`}
             >
-              ✏️ Create Resume
+              Create Resume
             </Link>
-            <button
-              type="button"
-              className="text-gray-700 hover:text-blue-600 hover:bg-blue-50 px-3 py-2 rounded-lg text-sm font-medium transition-all cursor-pointer"
+            <Link
+              to="/analyze"
+              id="navbar-analyze-btn"
+              className={`px-3 py-2 rounded-lg text-sm font-medium transition-all ${
+                isActive('/analyze')
+                  ? 'bg-blue-50 text-blue-600 font-semibold'
+                  : 'text-gray-700 hover:text-blue-600 hover:bg-blue-50'
+              }`}
             >
-              🔍 Analyze
-            </button>
+              Analyze Resume
+            </Link>
 
             {isAuthenticated ? (
               <>
                 <Link
                   to="/my-resumes"
-                  className="text-gray-700 hover:text-blue-600 hover:bg-blue-50 px-3 py-2 rounded-lg text-sm font-medium transition-all"
+                  className={`px-3 py-2 rounded-lg text-sm font-medium transition-all ${
+                    isActive('/my-resumes')
+                      ? 'bg-blue-50 text-blue-600 font-semibold'
+                      : 'text-gray-700 hover:text-blue-600 hover:bg-blue-50'
+                  }`}
                 >
-                  📁 My Resumes
+                  My Resumes
                 </Link>
 
                 {/* User Avatar Dropdown */}
@@ -99,14 +115,21 @@ const Navbar = () => {
                         onClick={() => setDropdownOpen(false)}
                         className="flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors"
                       >
-                        📁 My Resumes
+                        My Resumes
+                      </Link>
+                      <Link
+                        to="/analyze"
+                        onClick={() => setDropdownOpen(false)}
+                        className="flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors"
+                      >
+                        Analyze Resume
                       </Link>
                       <button
                         id="logout-btn"
                         onClick={handleLogout}
                         className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-red-600 hover:bg-red-50 transition-colors"
                       >
-                        🚪 Logout
+                        Logout
                       </button>
                     </div>
                   )}

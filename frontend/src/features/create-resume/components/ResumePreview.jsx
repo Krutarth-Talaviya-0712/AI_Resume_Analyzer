@@ -26,32 +26,40 @@ const Preview = ({
       setIsGenerating(false);
       return;
     }
-    const parentContainer = element.parentElement;
 
-    // Apply print-safe state
-    element.classList.add('downloading');
-    if (parentContainer) parentContainer.classList.add('downloading-parent');
+    // Deep-clone the resume and attach it directly to <body> so html2pdf
+    // captures the full A4 content without any parent transform or overflow clipping.
+    const clone = element.cloneNode(true);
+    clone.style.cssText = [
+      'position:fixed',
+      'top:-99999px',
+      'left:0',
+      'width:210mm',
+      'min-height:297mm',
+      'background:white',
+      'z-index:-1',
+      'visibility:hidden',
+    ].join(';');
+    document.body.appendChild(clone);
 
-    // Wait for fonts and styles to settle
-    await new Promise(resolve => setTimeout(resolve, 300));
+    // Let the browser paint the clone before capturing
+    await new Promise(resolve => setTimeout(resolve, 400));
 
     try {
-      const fileName = `${(resumeData?.name || 'Resume').trim().replace(/[^a-zA-Z0-9_-]/g, '_')}_Resume.pdf`;
+      const name = (resumeData?.name || 'Resume').trim().replace(/[^a-zA-Z0-9_-]/g, '_');
       const opt = {
-        margin:       0,
-        filename:     fileName,
-        image:        { type: 'jpeg', quality: 0.98 },
-        html2canvas:  { scale: 2, useCORS: true, logging: false },
-        jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' }
+        margin:      0,
+        filename:    `${name}_Resume.pdf`,
+        image:       { type: 'jpeg', quality: 0.98 },
+        html2canvas: { scale: 2, useCORS: true, logging: false, scrollX: 0, scrollY: 0 },
+        jsPDF:       { unit: 'mm', format: 'a4', orientation: 'portrait' },
       };
-
-      await html2pdf().set(opt).from(element).save();
-    } catch (error) {
-      console.error('PDF export error:', error);
-      alert('Failed to generate PDF. Please try again.');
+      await html2pdf().set(opt).from(clone).save();
+    } catch (err) {
+      console.error('PDF generation failed:', err);
+      alert('Could not generate PDF. Please try again.');
     } finally {
-      element.classList.remove('downloading');
-      if (parentContainer) parentContainer.classList.remove('downloading-parent');
+      document.body.removeChild(clone);
       setIsGenerating(false);
     }
   };
